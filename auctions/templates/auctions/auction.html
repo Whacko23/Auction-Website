@@ -1,5 +1,4 @@
 {% extends "auctions/layout.html" %}
-
 {% block title %}
 {{auction.name_of_product}}
 {% endblock %}
@@ -7,7 +6,13 @@
 {% block body %}
 <div class="container">
   <div class="bg-light">
-    <h1 class="display-4 pl-5">{{auction.name_of_product}}</h1>
+    <div class="px-5 pt-3">
+      <h1 class="display-4">{{auction.name_of_product}}</h1>
+      <img class="img-fluid" src = "{{img}} ">
+
+
+      <p class="text-secondary">Buyout Price: $ {{auction.buyout_price}}</p>
+    </div>
   </div>
 </div>
 {% endblock %}

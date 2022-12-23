@@ -17,8 +17,10 @@ def index(request):
 
 def auction(request, id):
     auction = Auction.objects.get(pk=id)
+    img = '../' + str(auction.image)
     return render(request, "auctions/auction.html",{
         "auction": auction,
+        "img": img,
     })
 
 def login_view(request):
