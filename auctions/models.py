@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+from django.conf import settings
 
 class User(AbstractUser):
     id = models.BigAutoField(primary_key=True)
@@ -25,7 +25,7 @@ class Auction(models.Model):
     category = models.ForeignKey(Categories, on_delete=models.PROTECT, related_name='auctions')
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     allotted_time = models.IntegerField()
-    image = models.ImageField(upload_to="auctions/images", null=True, blank=True)
+    image = models.ImageField(upload_to="images/product/%Y/%m", null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.name_of_product} by {self.listed_by}"

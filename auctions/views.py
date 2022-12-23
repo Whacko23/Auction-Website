@@ -4,12 +4,22 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User
+
+
+from .models import User, Auction, Bids, Categories, Comments
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    auctions = Auction.objects.all()
+    return render(request, "auctions/index.html", {
+        "auctions": auctions,
+    })
 
+def auction(request, id):
+    auction = Auction.objects.get(pk=id)
+    return render(request, "auctions/auction.html",{
+        "auction": auction,
+    })
 
 def login_view(request):
     if request.method == "POST":
