@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import When
 
 class User(AbstractUser):
     id = models.BigAutoField(primary_key=True)
@@ -46,7 +47,7 @@ class Comments(models.Model):
     comment = models.TextField()
     auction = models.ForeignKey(Auction, on_delete=models.CASCADE, related_name='comments')
     posted_at = models.DateTimeField(auto_now_add=True, editable=False)
-    subcomment = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    subcomment = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='subcomments')
 
     def __str__(self) -> str:
         return f"{self.comment[:50]}..." if len(self.comment) > 50 else f"{self.comment}"

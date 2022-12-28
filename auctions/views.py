@@ -9,6 +9,22 @@ from django.urls import reverse
 from .models import User, Auction, Bids, Categories, Comments
 
 
+def comment_to_list(comments):
+    mainlist = []
+    thread = []
+
+    for comment in comments:
+        if comment.subcomment == None:
+            thread.append(comment)
+            for subcomment in comment.subcomments.all():
+                thread.append(subcomment)
+        
+            mainlist.append(thread)
+            thread = []
+
+    return mainlist        
+    
+
 def index(request):
     auctions = Auction.objects.all()
     return render(request, "auctions/index.html", {
@@ -17,10 +33,19 @@ def index(request):
 
 def auction(request, id):
     auction = Auction.objects.get(pk=id)
+    #Ordering the bids by highest to lowest
+    bids = auction.bids.all().order_by('-amount')
+    #Manually adjusting image url
     img = '../' + str(auction.image)
+    comments = auction.comments.all()
+
+    comment_list = comment_to_list(comments)
+
     return render(request, "auctions/auction.html",{
         "auction": auction,
         "img": img,
+        "bids": bids,
+        "comments": comment_list,
     })
 
 def login_view(request):

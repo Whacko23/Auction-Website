@@ -9,10 +9,24 @@
     <div class="px-5 pt-3">
       <h1 class="display-4">{{auction.name_of_product}}</h1>
       <img class="img-fluid" src = "{{img}} ">
-
-
       <p class="text-secondary">Buyout Price: $ {{auction.buyout_price}}</p>
+      
+      {% if bids %}
+        
+      {% else %}
+        
+      {% endif %}
+        
     </div>
+  </div>
+  <div class="pt5 bg-light">
+    
+    {% if comments %}
+      
+    {% else %}
+      
+    {% endif %}
+      
   </div>
 </div>
 {% endblock %}
