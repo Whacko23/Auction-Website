@@ -36,7 +36,10 @@ def auction(request, id):
     current_auction = Auction.objects.get(pk=id)
     #Ordering the bids by highest to lowest
     bids = current_auction.bids.all().order_by('-amount')
-    highest_bid = bids.first().amount
+    if bids:
+        highest_bid = bids.first().amount
+    else :
+        highest_bid = 0
     #Manually adjusting image url
     img = '../' + str(current_auction.image)
     comments = current_auction.comments.all()

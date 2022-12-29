@@ -8,39 +8,46 @@
   <div class="bg-light">
     <div class="px-5 pt-3 pb-2">
       <h1 class="display-4">{{auction.name_of_product}}</h1>
-      <div class="row pt-3 pb-5">
-        <div class="col-8">
+      <div class="row pt-3 pb-5" style="margin-bottom: 5rem;">
+        <div class="col-xxl-8 col-xl-8 col-lg-8 col-md-12 col-sm-12 py-3">
           <img class="img-fluid" src = "{{img}} " style="max-height: 25em; max-width: 40em; object-fit:cover;">
         </div>
-        <div class="col-4">
-          <p class="pt-2 text-secondary">Buyout Price: $ {{auction.buyout_price}}</p>
-          <p class="text-secondary">
-            {% if bids %}
-              {% if user.is_authenticated %}
-                Current Highest Bid: {{bids.0}}
+        <div class="col-xxl-4 col-xl-4 col-lg-12 col-md-12 col-sm-12 py-3">
+          <section id = "product_details" class="p-3 bg-white" style="height: 120%; position: relative; ">
+            <div class="p-3 bg-white"></div>
+            <p class="pt-2 text-secondary">Buyout Price: $ {{auction.buyout_price}}</p>
+            <p class="text-secondary">
+              {% if bids %}
+                {% if user.is_authenticated %}
+                  Current Highest Bid: {{bids.0}}
+                {% else %}
+                  Current Highest Bid: $ {{bids.0.amount}}
+                {% endif %}
               {% else %}
-                Current Highest Bid: $ {{bids.0.amount}}
+                Current Bid: $ 0.00
               {% endif %}
-            {% else %}
-              Current Bid: $ 0.00
-            {% endif %}
-          </p>
-          <p class="text-secondary">Category: {{auction.category}}</p>
-          <form action="{% url 'auction' auction.id %}" method="post">
-            {% csrf_token %}
-            <div class="row">
-              <div class="col">
-                <div class="form-group">
-                  <input class="form-control" autofocus type="number" name="bid_amount" value = '{{bids.0.amount|add:5}}' placeholder="Bid Amount">
+            </p>
+            <p class="text-secondary">Category: {{auction.category}}</p>
+            <div style="position: absolute; bottom:5px;">
+              <form action="{% url 'auction' auction.id %}" method="post">
+                {% csrf_token %}
+                <div class="row">
+                  <div class="col">
+                    <div class="form-group">
+                      <input class="form-control" autofocus type="number" name="bid_amount" value = '{{bids.0.amount|add:5}}' placeholder="Bid Amount">
+                    </div>
+                  </div>
+                  <div class="col">
+                    <div class="form-group px-3">
+                      <input type="submit" value="Bid" class="btn btn-success px-5">
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div class="col">
-                <div class="form-group px-3">
-                  <input type="submit" value="Bid" class="btn btn-success px-5">
-                </div>
-              </div>
+              </form>              
             </div>
-          </form>
+           
+          </section>
+
         </div>
       </div>
       
