@@ -8,20 +8,27 @@
   <div class="bg-light">
     <div class="px-5 pt-3 pb-2">
       <h1 class="display-4">{{auction.name_of_product}}</h1>
-      <img class="img-fluid" src = "{{img}} ">
-      <p class="pt-2 text-secondary">Buyout Price: $ {{auction.buyout_price}}</p>
-      <p class="text-secondary">
-        {% if bids %}
-          {% if user.is_authenticated %}
-            Current Highest Bid: {{bids.0}}
-          {% else %}
-            Current Highest Bid: $ {{bids.0.amount}}
-          {% endif %}
-        {% else %}
-          Current Bid: $ 0.00
-        {% endif %}
-      </p>
-      <p class="text-secondary">Category: {{auction.category}}</p>
+      <div class="row pt-3 pb-5">
+        <div class="col-8">
+          <img class="img-fluid" src = "{{img}} " style="max-height: 25em; max-width: 40em; object-fit:cover;">
+        </div>
+        <div class="col-4">
+          <p class="pt-2 text-secondary">Buyout Price: $ {{auction.buyout_price}}</p>
+          <p class="text-secondary">
+            {% if bids %}
+              {% if user.is_authenticated %}
+                Current Highest Bid: {{bids.0}}
+              {% else %}
+                Current Highest Bid: $ {{bids.0.amount}}
+              {% endif %}
+            {% else %}
+              Current Bid: $ 0.00
+            {% endif %}
+          </p>
+          <p class="text-secondary">Category: {{auction.category}}</p>
+        </div>
+      </div>
+      
         
     </div>
   </div>
@@ -45,7 +52,7 @@
             {% if comment == thread|last %}
               <p class="px-5 pb-3  text-seconary">
                 {% if comment.user %}
-                 {{comment.user}} : {{comment.comment}}
+                 {{comment.user}} : {{commcomnt.comment}}
                 {% else %}
                  Anonymous : {{comment.comment}}
                 {% endif %}
