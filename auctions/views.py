@@ -32,20 +32,47 @@ def index(request):
     })
 
 def auction(request, id):
-    auction = Auction.objects.get(pk=id)
+    message = ""
+    current_auction = Auction.objects.get(pk=id)
     #Ordering the bids by highest to lowest
-    bids = auction.bids.all().order_by('-amount')
+    bids = current_auction.bids.all().order_by('-amount')
+    highest_bid = bids.first().amount
     #Manually adjusting image url
-    img = '../' + str(auction.image)
-    comments = auction.comments.all()
+    img = '../' + str(current_auction.image)
+    comments = current_auction.comments.all()
 
     comment_list = comment_to_list(comments)
 
+    if request.method=="POST":
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(reverse('login'))
+        bid=request.POST["bid_amount"]
+        
+        if int(bid) < int(highest_bid) + 5:
+            message = f'The current bid is $ {highest_bid}. Please bid at least $ {highest_bid + 5}'
+            return render(request, "auctions/auction.html",{
+                "auction": current_auction,
+                "img": img,
+                "bids": bids,
+                "comments": comment_list,
+                "message": message,
+            })            
+        else:
+            bid = Bids(amount=int(bid), posted_by=request.user, auction=current_auction)
+            bid.save()
+
+        return HttpResponseRedirect(reverse('auction',kwargs={
+            'id':current_auction.id,
+        }))
+
+
+
     return render(request, "auctions/auction.html",{
-        "auction": auction,
+        "auction": current_auction,
         "img": img,
         "bids": bids,
         "comments": comment_list,
+        "message": message,
     })
 
 def login_view(request):

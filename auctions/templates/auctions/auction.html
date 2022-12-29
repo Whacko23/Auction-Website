@@ -26,6 +26,21 @@
             {% endif %}
           </p>
           <p class="text-secondary">Category: {{auction.category}}</p>
+          <form action="{% url 'auction' auction.id %}" method="post">
+            {% csrf_token %}
+            <div class="row">
+              <div class="col">
+                <div class="form-group">
+                  <input class="form-control" autofocus type="number" name="bid_amount" value = '{{bids.0.amount|add:5}}' placeholder="Bid Amount">
+                </div>
+              </div>
+              <div class="col">
+                <div class="form-group px-3">
+                  <input type="submit" value="Bid" class="btn btn-success px-5">
+                </div>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
       
@@ -52,7 +67,7 @@
             {% if comment == thread|last %}
               <p class="px-5 pb-3  text-seconary">
                 {% if comment.user %}
-                 {{comment.user}} : {{commcomnt.comment}}
+                 {{comment.user}} : {{comment.comment}}
                 {% else %}
                  Anonymous : {{comment.comment}}
                 {% endif %}

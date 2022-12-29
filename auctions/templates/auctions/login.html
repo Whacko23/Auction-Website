@@ -4,10 +4,7 @@
 
     <h2>Login</h2>
 
-    {% if message %}
-        <div>{{ message }}</div>
-    {% endif %}
-
+<div class="container-xl">
     <form action="{% url 'login' %}" method="post">
         {% csrf_token %}
         <div class="form-group">
@@ -20,5 +17,7 @@
     </form>
 
     Don't have an account? <a href="{% url 'register' %}">Register here.</a>
+
+</div>
 
 {% endblock %}

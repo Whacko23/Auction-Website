@@ -37,7 +37,17 @@
             {% endif %}
         </ul>
         <hr>
+        
+        {% if message %}
+        <div>
+            <p class="bg-danger p-3">
+                {{ message }}
+            </p>
+        </div>
+        {% endif %}
+    
         {% block body %}
+
         {% endblock %}
     </body>
 </html>
