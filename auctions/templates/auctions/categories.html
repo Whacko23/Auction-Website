@@ -1,0 +1,35 @@
+{% extends "auctions/layout.html" %}
+
+
+{% block title %}
+  Categories 
+{% endblock title %}
+  
+{% block body %}
+    <h2 class="m-10 pb-10">
+      Categories
+    </h2>
+
+
+  
+    <div class="container-xl overflow-hidden">
+      <div class="row g-2 g-lg-3">
+        {% for category in categories %}
+          <div class="col-xxl-2 col-xl-3 col-lg-4 col-md-4 col-sm-6 py-3" style="height: 12rem;">
+            <div class="p-2 h-100 border bg-light justify-content-center">
+              <div style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);">
+                <a href="{% url 'category' category.category %}" class="text-reset text-decoration-none text-danger ">
+                  {{category}}
+                </a>
+              </div>
+
+            </div>
+
+          </div>
+          
+        {% endfor %}
+      </div>
+    </div>
+
+      
+{% endblock %}

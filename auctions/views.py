@@ -98,3 +98,22 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+def categories(request):
+    categories = Categories.objects.all()
+    for category in categories:
+        print(category)
+    return render(request, "auctions/categories.html",{
+        "categories": categories,
+    })
+
+def category_listing(request, category):
+    category = Categories.objects.get(pk=category)
+    auctions = category.auctions.all()
+
+    for auction in auctions:
+        auction.image = '../' + str(auction.image)
+
+    return render(request, "auctions/index.html", {
+        "auctions": auctions,
+    })

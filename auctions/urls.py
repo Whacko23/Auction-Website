@@ -10,6 +10,9 @@ urlpatterns = [
     path("logout", views.logout_view, name="logout"),
     path("register", views.register, name="register"),
     path("auction/<int:id>", views.auction, name="auction"),
+    path("categories", views.categories, name='categories'),
+    path("categories/<str:category>", views.category_listing, name='category'),
+
 ]
 
 urlpatterns +=  static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

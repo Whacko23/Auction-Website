@@ -39,7 +39,7 @@ class Bids(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
     def __str__(self) -> str:
-        return f"${self.amount} by {self.posted_by}"
+        return f"$ {self.amount} by {self.posted_by}"
 
 class Comments(models.Model):
     id = models.BigAutoField(primary_key=True)

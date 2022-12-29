@@ -10,7 +10,7 @@
                         {% for listing in auctions %}
                         <div class="col-xxl-2 col-xl-3 col-lg-4 col-md-4 col-sm-6 border p-3 pb-6 m-2 bg-light">
                             <a href="{% url 'auction' listing.id %}" class="text-reset text-decoration-none text-danger">
-                                <img class="img-fluid" src = "{{listing.image}} ">
+                                <img class="img-fluid" src = "{{listing.image}} " style="height: 20em; width: 100%; object-fit: cover; ">
                                 <h3 class="fw-light pt-3"> {{listing.name_of_product}}</h3>
                                 <p> Buyout price: ${{listing.buyout_price}}</p>
                                 <p> Created at: {{listing.created_at}}</p>
