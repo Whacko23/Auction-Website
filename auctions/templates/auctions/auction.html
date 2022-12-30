@@ -102,18 +102,18 @@
         {% endfor %}
       </div>
       
-      {% with thread|last as lastcomment %}
+      {% with thread|first as firstcomment %}
         {% if user.is_authenticated %}
           <form action="{% url 'auction' auction.id %}" method="post" style="width: 90%; padding:0px 0px 20px 0px; margin-left: auto; margin-right: 0;">
             {% csrf_token %}
             <input type="text" name="reply"  class="form-control" placeholder="Post a reply as {{user}}" required pattern="\S.*" >
-            <input type="hidden" name="comment_id" value="{{lastcomment.id}}">
+            <input type="hidden" name="comment_id" value="{{firstcomment.id}}">
           </form>
         {% else %}
           <form action="{% url 'auction' auction.id %}" method="post" style="width: 90%; padding:0px 0px 20px 0px; margin-left: auto; margin-right: 0;">
             {% csrf_token %}
             <input type="text" name="anonymous-reply"  class="form-control" placeholder="Post a reply as anonymous" required pattern="\S.*">
-            <input type="hidden" name="comment_id" value="{{lastcomment.id}}">
+            <input type="hidden" name="comment_id" value="{{firstcomment.id}}">
           </form> 
         {% endif %}        
       {% endwith %}

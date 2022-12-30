@@ -12,16 +12,20 @@ from .models import User, Auction, Bids, Categories, Comments
 def comment_to_list(comments):
     mainlist = []
     thread = []
+    print('-------------')
 
     for comment in comments:
+        print("comment ", comment, comment.subcomment)
         if comment.subcomment == None:
             thread.append(comment)
             for subcomment in comment.subcomments.all():
                 thread.append(subcomment)
-        
+
+            print('thread', thread)
             mainlist.append(thread)
             thread = []
-
+    
+    print('-------------')
     return mainlist        
     
 
@@ -46,9 +50,18 @@ def auction(request, id):
         comment = Comments(comment=text, auction=current_auction)
         comment.save()
     elif request.method == 'POST' and 'reply' in request.POST:
-        pass
+        text = request.POST['reply']
+        parent_id = request.POST['comment_id']
+        parent_comment = Comments.objects.get(pk=parent_id)
+        comment = Comments(user=request.user,comment=text, auction=current_auction, subcomment=parent_comment)
+        comment.save()
+        
     elif request.method == 'POST' and 'anonymous-reply' in request.POST:
-        pass
+        text = request.POST['anonymous-reply']
+        parent_id = request.POST['comment_id']
+        parent_comment = Comments.objects.get(pk=parent_id)
+        comment = Comments(comment=text, auction=current_auction, subcomment=parent_comment)
+        comment.save()
 
 
 

@@ -24,6 +24,8 @@ class Auction(models.Model):
     listed_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='auctions')
     category = models.ForeignKey(Categories, on_delete=models.PROTECT, related_name='auctions')
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    # closed = models.BooleanField(default=False)
+    # winner = models.ForeignKey(User,on_delete=models.SET_NULL, null=True, blank=True, name='won_auctions')
     allotted_time = models.IntegerField()
     image = models.ImageField(upload_to="images/product/%Y/%m", null=True, blank=True)
 
