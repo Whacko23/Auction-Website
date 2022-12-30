@@ -39,7 +39,7 @@
                   </div>
                   <div class="col">
                     <div class="form-group px-3">
-                      <input type="submit" value="Bid" class="btn btn-success px-5">
+                      <input type="submit" value="Bid" class="btn btn-success px-5" required pattern="\S+">
                     </div>
                   </div>
                 </div>
@@ -63,11 +63,21 @@
           {% if comment == thread|first %}
             {% if comment == thread|last %}
               <p class="px-3 py-3 text-seconary">
-              {{comment.user}} : {{comment.comment}}
+              
+              {% if comment.user %}
+                {{comment.user}} : {{comment.comment}}
+              {% else %}
+                Anonymous : {{comment.comment}}
+              {% endif %}
+                
               </p>              
             {% else %}
               <p class="px-3 pt-3 text-seconary">
-              {{comment.user}} : {{comment.comment}}
+              {% if comment.user %}
+                {{comment.user}} : {{comment.comment}}
+              {% else %}
+                Anonymous : {{comment.comment}}
+              {% endif %}
               </p>              
             {% endif %}
           {% else %}
@@ -91,9 +101,42 @@
           {% endif %}
         {% endfor %}
       </div>
+      
+      {% with thread|last as lastcomment %}
+        {% if user.is_authenticated %}
+          <form action="{% url 'auction' auction.id %}" method="post" style="width: 90%; padding:0px 0px 20px 0px; margin-left: auto; margin-right: 0;">
+            {% csrf_token %}
+            <input type="text" name="reply"  class="form-control" placeholder="Post a reply as {{user}}" required pattern="\S.*" >
+            <input type="hidden" name="comment_id" value="{{lastcomment.id}}">
+          </form>
+        {% else %}
+          <form action="{% url 'auction' auction.id %}" method="post" style="width: 90%; padding:0px 0px 20px 0px; margin-left: auto; margin-right: 0;">
+            {% csrf_token %}
+            <input type="text" name="anonymous-reply"  class="form-control" placeholder="Post a reply as anonymous" required pattern="\S.*">
+            <input type="hidden" name="comment_id" value="{{lastcomment.id}}">
+          </form> 
+        {% endif %}        
+      {% endwith %}
+        
+
    {% empty %}
     <p class="text-seconday"> No Comments found</p>
    {% endfor %}
+        <div class="b-3 rounded pb-5">
+      
+      {% if user.is_authenticated %}
+        <form action="{% url 'auction' auction.id %}" method="post">
+          {% csrf_token %}
+          <input type="text" name="comment"  class="form-control" placeholder="Post a comment as {{user}}" required pattern="\S.*">
+        </form>
+      {% else %}
+        <form action="{% url 'auction' auction.id %}" method="post">
+          {% csrf_token %}
+          <input type="text" name="anonymous-comment"  class="form-control" placeholder="Post a comment as anonymous" required pattern="\S.*">
+        </form> 
+      {% endif %}
+        
+      </div>
     
       
   </section>

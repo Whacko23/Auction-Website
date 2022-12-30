@@ -32,8 +32,26 @@ def index(request):
     })
 
 def auction(request, id):
-    message = ""
+    message = ''
     current_auction = Auction.objects.get(pk=id)
+
+    #Handle the comment form
+    if request.method == 'POST' and 'comment' in request.POST:
+        text = request.POST['comment']
+        comment = Comments(user=request.user,comment=text, auction=current_auction)
+        comment.save()
+        # if comm
+    elif request.method == 'POST' and 'anonymous-comment' in request.POST:
+        text = request.POST['anonymous-comment']
+        comment = Comments(comment=text, auction=current_auction)
+        comment.save()
+    elif request.method == 'POST' and 'reply' in request.POST:
+        pass
+    elif request.method == 'POST' and 'anonymous-reply' in request.POST:
+        pass
+
+
+
     #Ordering the bids by highest to lowest
     bids = current_auction.bids.all().order_by('-amount')
     if bids:
@@ -46,11 +64,21 @@ def auction(request, id):
 
     comment_list = comment_to_list(comments)
 
-    if request.method=="POST":
+    if request.method=="POST" and 'bid_amount' in request.POST:
         if not request.user.is_authenticated:
             return HttpResponseRedirect(reverse('login'))
         bid=request.POST["bid_amount"]
         
+        if not bid:
+            message = 'Please put a valid amount'
+            return render(request, "auctions/auction.html",{
+                "auction": current_auction,
+                "img": img,
+                "bids": bids,
+                "comments": comment_list,
+                "message": message,
+            }) 
+
         if int(bid) < int(highest_bid) + 5:
             message = f'The current bid is $ {highest_bid}. Please bid at least $ {highest_bid + 5}'
             return render(request, "auctions/auction.html",{
