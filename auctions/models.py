@@ -53,3 +53,12 @@ class Comments(models.Model):
 
     def __str__(self) -> str:
         return f"{self.comment[:50]}..." if len(self.comment) > 50 else f"{self.comment}"
+
+class Watchlist(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
+    auction = models.ForeignKey(Auction, on_delete=models.CASCADE, related_name='user')
+
+    def __str__(self) -> str:
+        return f"{self.auction.name_of_product}"
+    pass

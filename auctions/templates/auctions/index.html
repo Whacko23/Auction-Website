@@ -1,7 +1,13 @@
 {% extends "auctions/layout.html" %}
 
+
+{% block title %}
+    {{title}}
+{% endblock title %}
+    
+
 {% block body %}
-    <h2 class="m-10 pb-10">Active Listings</h2>
+    <h2 class="m-10 pb-10">{{title}}</h2>
 
     {% if auctions %}
             <section id="list">

@@ -6,7 +6,7 @@ from django.urls import reverse
 
 
 
-from .models import User, Auction, Bids, Categories, Comments
+from .models import User, Auction, Bids, Categories, Comments, Watchlist
 
 
 def comment_to_list(comments):
@@ -29,6 +29,8 @@ def index(request):
     auctions = Auction.objects.filter(closed=False)
     return render(request, "auctions/index.html", {
         "auctions": auctions,
+        "title": 'Active Listing',
+
     })
 
 def auction(request, id):
@@ -169,8 +171,7 @@ def register(request):
 
 def categories(request):
     categories = Categories.objects.all()
-    for category in categories:
-        print(category)
+
     return render(request, "auctions/categories.html",{
         "categories": categories,
     })
@@ -182,6 +183,7 @@ def category_listing(request, category):
     for auction in auctions:
         auction.image = '../' + str(auction.image)
 
+
     return render(request, "auctions/index.html", {
         "auctions": auctions,
     })
@@ -190,4 +192,22 @@ def closed_auctions(request):
     auctions = Auction.objects.filter(closed=True)
     return render(request, "auctions/index.html", {
         "auctions": auctions,
+        'title': 'Closed Auctions', 
+    })
+
+def watchlist(request):
+    watchlist = Watchlist.objects.filter(user=request.user)
+    
+    auctions =[]
+
+    #Converting watchlist object to auction object
+    for item in watchlist:
+        # Manually adjusting image url
+        item.auction.image = '../' + str(item.auction.image)
+        auctions.append(item.auction)
+        
+
+    return render(request, "auctions/index.html", {
+        "auctions": auctions,
+        'title': 'Watchlist',
     })
