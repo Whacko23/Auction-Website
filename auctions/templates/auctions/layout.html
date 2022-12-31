@@ -30,8 +30,19 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#">Create Listing</a>
                 </li>  
-                <li class="nav-item" >
+                <li class="nav-item" style="position: relative;" >
                     <a class="nav-link" href="{% url 'watchlist' %}">My WatchList</a>
+                    
+                    {% if watchlist %}
+                        
+                        {% if watchlist|length > 9 %}
+                            <div class="badge" style="padding: 5px;">{{watchlist|length}}</div>
+                        {% else %}
+                            <div class="badge" style="padding: 5px 7px;">{{watchlist|length}}</div>
+                        {% endif %}
+                            
+                    {% endif %}
+                        
                 </li> 
                 <li class="nav-item" style="margin-left:auto; margin-right: 20px;">
                     <a class="nav-link" href="{% url 'logout' %}">Log Out</a>

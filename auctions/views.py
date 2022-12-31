@@ -8,7 +8,7 @@ from django.urls import reverse
 
 from .models import User, Auction, Bids, Categories, Comments, Watchlist
 
-
+# Helper functions
 def comment_to_list(comments):
     mainlist = []
     thread = []
@@ -24,11 +24,28 @@ def comment_to_list(comments):
     
     return mainlist        
     
+def get_watchlist(req_user):
+    watchlist_object = Watchlist.objects.filter(user=req_user)
+    
+    watchlist =[]
+
+    #Converting watchlist object to auction object
+    for item in watchlist_object:
+        # Manually adjusting image url
+        item.auction.image = '../' + str(item.auction.image)
+        watchlist.append(item.auction)
+
+    return watchlist
+
+
+# Webpage Views
 
 def index(request):
     auctions = Auction.objects.filter(closed=False)
+    watchlist = get_watchlist(request.user) if request.user.is_authenticated else []
     return render(request, "auctions/index.html", {
         "auctions": auctions,
+        "watchlist": watchlist,
         "title": 'Active Listing',
 
     })
@@ -36,6 +53,8 @@ def index(request):
 def auction(request, id):
     message = ''
     current_auction = Auction.objects.get(pk=id)
+
+    watchlist = get_watchlist(request.user) if request.user.is_authenticated else []
 
     #Handle the comment form
     if request.method == 'POST' and 'comment' in request.POST:
@@ -116,6 +135,7 @@ def auction(request, id):
         "bids": bids,
         "comments": comment_list,
         "message": message,
+        "watchlist": watchlist,
     })
 
 def login_view(request):
@@ -171,14 +191,17 @@ def register(request):
 
 def categories(request):
     categories = Categories.objects.all()
+    watchlist = get_watchlist(request.user) if request.user.is_authenticated else []
 
     return render(request, "auctions/categories.html",{
         "categories": categories,
+        "watchlist": watchlist,
     })
 
 def category_listing(request, category):
     category = Categories.objects.get(pk=category)
     auctions = category.auctions.filter(closed=False)
+    watchlist = get_watchlist(request.user) if request.user.is_authenticated else []
 
     for auction in auctions:
         auction.image = '../' + str(auction.image)
@@ -186,28 +209,24 @@ def category_listing(request, category):
 
     return render(request, "auctions/index.html", {
         "auctions": auctions,
+        "watchlist": watchlist,
     })
 
 def closed_auctions(request):
     auctions = Auction.objects.filter(closed=True)
+    watchlist = get_watchlist(request.user) if request.user.is_authenticated else []
+
     return render(request, "auctions/index.html", {
         "auctions": auctions,
         'title': 'Closed Auctions', 
+        'watchlist': watchlist,
     })
 
 def watchlist(request):
-    watchlist = Watchlist.objects.filter(user=request.user)
-    
-    auctions =[]
-
-    #Converting watchlist object to auction object
-    for item in watchlist:
-        # Manually adjusting image url
-        item.auction.image = '../' + str(item.auction.image)
-        auctions.append(item.auction)
-        
+    watchlist = get_watchlist(request.user)   
 
     return render(request, "auctions/index.html", {
-        "auctions": auctions,
+        "auctions": watchlist,
+        "watchlist": watchlist,
         'title': 'Watchlist',
     })
