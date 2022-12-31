@@ -12,25 +12,21 @@ from .models import User, Auction, Bids, Categories, Comments
 def comment_to_list(comments):
     mainlist = []
     thread = []
-    print('-------------')
 
     for comment in comments:
-        print("comment ", comment, comment.subcomment)
         if comment.subcomment == None:
             thread.append(comment)
             for subcomment in comment.subcomments.all():
                 thread.append(subcomment)
 
-            print('thread', thread)
             mainlist.append(thread)
             thread = []
     
-    print('-------------')
     return mainlist        
     
 
 def index(request):
-    auctions = Auction.objects.all()
+    auctions = Auction.objects.filter(closed=False)
     return render(request, "auctions/index.html", {
         "auctions": auctions,
     })
@@ -55,14 +51,15 @@ def auction(request, id):
         parent_comment = Comments.objects.get(pk=parent_id)
         comment = Comments(user=request.user,comment=text, auction=current_auction, subcomment=parent_comment)
         comment.save()
-        
     elif request.method == 'POST' and 'anonymous-reply' in request.POST:
         text = request.POST['anonymous-reply']
         parent_id = request.POST['comment_id']
         parent_comment = Comments.objects.get(pk=parent_id)
         comment = Comments(comment=text, auction=current_auction, subcomment=parent_comment)
         comment.save()
-
+    elif request.method == 'POST' and 'close-auction' in request.POST:
+        current_auction.closed = True
+        current_auction.save()
 
 
     #Ordering the bids by highest to lowest
@@ -180,11 +177,17 @@ def categories(request):
 
 def category_listing(request, category):
     category = Categories.objects.get(pk=category)
-    auctions = category.auctions.all()
+    auctions = category.auctions.filter(closed=False)
 
     for auction in auctions:
         auction.image = '../' + str(auction.image)
 
+    return render(request, "auctions/index.html", {
+        "auctions": auctions,
+    })
+
+def closed_auctions(request):
+    auctions = Auction.objects.filter(closed=True)
     return render(request, "auctions/index.html", {
         "auctions": auctions,
     })
