@@ -230,3 +230,25 @@ def watchlist(request):
         "watchlist": watchlist,
         'title': 'Watchlist',
     })
+
+def create_listing(request):
+    if request.method == 'POST':
+        name = request.POST["title"]
+        price = request.POST["BuyoutPrice"]
+        category = request.POST["Category"]
+        expiry = request.POST["Expiry-time"]
+        pic = request.POST["pic"]
+
+        new_auction = Auction(name_of_product=name, buyout_price= price, listed_by=request.user, category=Categories.objects.get(pk=category), allotted_time= expiry, image = pic)
+        new_auction.save()
+        return HttpResponseRedirect(reverse('auction', kwargs={
+            "id": new_auction.id,
+        }))
+
+    watchlist = get_watchlist(request.user) if request.user.is_authenticated else []
+    categories = Categories.objects.all()
+
+    return render(request, "auctions/createauction.html",{
+        "watchlist": watchlist,
+        'categories': categories,
+    })

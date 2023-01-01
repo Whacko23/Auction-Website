@@ -1,0 +1,47 @@
+{% extends "auctions/layout.html" %}
+
+
+{% block title %}
+    Create Auction Listi ng
+{% endblock title %}
+    
+
+{% block body %}
+    <h2 class="m-5 pb-5">Create Auction Listing</h2>
+    <div class="container-xl">
+      <form action="{% url 'create_listing' %}" method="post">
+        {% csrf_token %}
+        <div class="row">
+          <div class="col-12 mt-4">
+            <input type="text" autofocus name="title" placeholder="Enter the Auction Title" class="form-control" maxlength="100" required pattern="\S.*">
+          </div>
+          <div class="col-lg-3 col-m-5 col-sm-5 mt-4">
+            <input type="number" name="BuyoutPrice" placeholder="BuyOut Price" class="form-control" required pattern="\S.*">
+          </div>
+          <div class="col-lg-3 col-m-1 col-sm-1"></div>
+          <div class="col-6 mt-4">
+            <select name="Category" class="form-control" >
+              <option value="" disabled selected>Please Select a Category</option>
+              {% for category in categories %}
+                <option value="{{category}}">{{category}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-5 mt-4">
+            <input type="number" name="Expiry-time"  placeholder="Expiry time (in days)" class="form-control">
+          </div> 
+          <div class="col-lg-2 col-m-1 col-sm-1 mt-4"></div> 
+          <div class="col-lg-5 col-m-6 col-sm-6 mt-4">
+            <input type="file" accept="image/*" name="pic" class="form-control">
+          </div>
+          <div class="col-lg-4 col-m-4 col-sm-4 mt-4"></div> 
+          <div class="col-lg-3 col-m-4 col-sm-4 mt-4">
+            <input type="submit" value="Submit"  class="btn btn-success" style="width: 100%;">
+          </div> 
+          <div class="col-lg-5 col-m-4 col-sm-4 mt-4"></div> 
+          
+        </div>
+      </form>
+
+    </div>
+{% endblock %}
