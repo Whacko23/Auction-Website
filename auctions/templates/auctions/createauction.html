@@ -9,7 +9,7 @@
 {% block body %}
     <h2 class="m-5 pb-5">Create Auction Listing</h2>
     <div class="container-xl">
-      <form action="{% url 'create_listing' %}" method="post">
+      <form action="{% url 'create_listing' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="row">
           <div class="col-12 mt-4">

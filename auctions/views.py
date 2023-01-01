@@ -3,6 +3,8 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.core.files.storage import FileSystemStorage
+from datetime import date
 
 
 
@@ -37,7 +39,18 @@ def get_watchlist(req_user):
 
     return watchlist
 
+def file_upload(request, field_name, location=''):
+    myfile = request.FILES[field_name]
+    fs = FileSystemStorage()
 
+    filename = fs.save(location + myfile.name, myfile)
+    uploaded_file_url = fs.url(filename)
+    
+    return uploaded_file_url
+
+def get_year_month():
+    return str(date.today().year) + '/' + str(date.today().month) + '/'
+    
 # Webpage Views
 
 def index(request):
@@ -237,9 +250,10 @@ def create_listing(request):
         price = request.POST["BuyoutPrice"]
         category = request.POST["Category"]
         expiry = request.POST["Expiry-time"]
-        pic = request.POST["pic"]
 
-        new_auction = Auction(name_of_product=name, buyout_price= price, listed_by=request.user, category=Categories.objects.get(pk=category), allotted_time= expiry, image = pic)
+        imageurl = file_upload(request, "pic", f'images/product/{get_year_month()}')
+
+        new_auction = Auction(name_of_product=name, buyout_price= price, listed_by=request.user, category=Categories.objects.get(pk=category), allotted_time= expiry, image=imageurl)
         new_auction.save()
         return HttpResponseRedirect(reverse('auction', kwargs={
             "id": new_auction.id,
