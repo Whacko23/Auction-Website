@@ -7,7 +7,7 @@
 <div class="container">
   <div class="bg-light">
     <div class="px-5 pt-3 pb-2">
-      <h1 class="display-5">{{auction.name_of_product}}</h1>
+      <h2 class="font-weight-light">{{auction.name_of_product}}</h2>
       <div class="row pt-3 pb-5" style="margin-bottom: 5rem; ">
         <div class="col-xxl-8 col-xl-8 col-lg-8 col-md-12 col-sm-12 py-3">
           <img class="img-fluid" src = "{{img}} " style="max-height: 25em; max-width: 40em; object-fit:cover;">
@@ -34,7 +34,6 @@
               <!-- if auction open  -->
               {% if not auction.closed %}
                   <!-- if user == op -->
-                
                 {% if auction.listed_by == request.user %}
                   <form action="{% url 'auction' auction.id %}" method="post">
                     {% csrf_token %}
@@ -42,24 +41,40 @@
                   </form>  
                   <!-- if user != op -->
                 {% else %}
-                  <form action="{% url 'auction' auction.id %}" method="post">
-                    {% csrf_token %}
-                    <div class="row">
-                      <div class="col">
-                        <div class="form-group">
-                          <input class="form-control" autofocus type="number" name="bid_amount" value = '{{bids.0.amount|add:5}}' placeholder="Bid Amount">
+                <form action="{% url 'auction' auction.id %}" method="post">
+                      {% csrf_token %}
+                      <div class="row">
+                        <div class="col">
+                          <div class="form-group px-3">
+                            <input type="submit" name="add_watchlist" value="Add to WatchList" class="btn btn-success px-5">
+                          </div>
                         </div>
                       </div>
-                      <div class="col">
-                        <div class="form-group px-3">
-                          <input type="submit" value="Bid" class="btn btn-success px-5">
+                    </form> 
+                {% with bids|first as latest_bid  %}
+                <!-- if user has the last bid -->
+                  {% if latest_bid.posted_by == request.user %}
+                    <div class="btn btn-primary" style="margin-bottom: 15px; padding-left: 3em; padding-right: 3em;"> You have the latest bid</div>
+                  {% else %}
+                <!-- if user does not have the last bid -->
+                    <form action="{% url 'auction' auction.id %}" method="post">
+                      {% csrf_token %}
+                      <div class="row">
+                        <div class="col">
+                          <div class="form-group">
+                            <input class="form-control" autofocus type="number" name="bid_amount" value = '{{bids.0.amount|add:5}}' placeholder="Bid Amount">
+                          </div>
+                        </div>
+                        <div class="col">
+                          <div class="form-group px-3">
+                            <input type="submit" value="Bid" class="btn btn-success px-5">
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </form>                  
+                    </form>                     
+                  {% endif %}
+                {% endwith %}
                 {% endif %}
-                  
-
               {% else %}
                 <!-- if auction closed  -->
                   

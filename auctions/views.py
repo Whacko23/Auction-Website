@@ -65,11 +65,16 @@ def index(request):
 
 def auction(request, id):
     message = ''
+    item_in_watchlist = False
     current_auction = Auction.objects.get(pk=id)
 
     watchlist = get_watchlist(request.user) if request.user.is_authenticated else []
 
-    #Handle the comment form
+    if current_auction in watchlist:
+        item_in_watchlist = True
+
+
+    # Add comment
     if request.method == 'POST' and 'comment' in request.POST:
         text = request.POST['comment']
         comment = Comments(user=request.user,comment=text, auction=current_auction)
@@ -108,11 +113,35 @@ def auction(request, id):
 
     comment_list = comment_to_list(comments)
 
+        # Add to watchlist
+    if request.method=="POST" and 'add_watchlist' in request.POST:
+        new_watchlist_item = Watchlist(user=request.user, auction=Auction.objects.get(pk=id))
+        if not item_in_watchlist:
+            new_watchlist_item.save()
+
+            return HttpResponseRedirect(reverse('auction', kwargs={
+                'id': id,
+            }))
+        else:
+            message = "Item already in the watchlist"
+            return render(request, "auctions/auction.html",{
+                "auction": current_auction,
+                "img": img,
+                "bids": bids,
+                "comments": comment_list,
+                "message": message,
+                "watchlist": watchlist,
+
+            }) 
+        
     if request.method=="POST" and 'bid_amount' in request.POST:
+        #IF the user not logged in and wants to bid, redirect to login
         if not request.user.is_authenticated:
             return HttpResponseRedirect(reverse('login'))
         bid=request.POST["bid_amount"]
         
+        # Bid input amount validation
+        # IF bid amount is null
         if not bid:
             message = 'Please put a valid amount'
             return render(request, "auctions/auction.html",{
@@ -121,8 +150,11 @@ def auction(request, id):
                 "bids": bids,
                 "comments": comment_list,
                 "message": message,
+                "watchlist": watchlist,
+
             }) 
 
+        # IF bid amount is not greater than latest bid
         if int(bid) < int(highest_bid) + 5:
             message = f'The current bid is $ {highest_bid}. Please bid at least $ {highest_bid + 5}'
             return render(request, "auctions/auction.html",{
@@ -131,8 +163,11 @@ def auction(request, id):
                 "bids": bids,
                 "comments": comment_list,
                 "message": message,
+                "watchlist": watchlist,
+
             })            
         else:
+        # Save the bid
             bid = Bids(amount=int(bid), posted_by=request.user, auction=current_auction)
             bid.save()
 
@@ -223,6 +258,8 @@ def category_listing(request, category):
     return render(request, "auctions/index.html", {
         "auctions": auctions,
         "watchlist": watchlist,
+        'title': category,
+
     })
 
 def closed_auctions(request):
@@ -245,6 +282,7 @@ def watchlist(request):
     })
 
 def create_listing(request):
+    #Note: Skipped input validation
     if request.method == 'POST':
         name = request.POST["title"]
         price = request.POST["BuyoutPrice"]
