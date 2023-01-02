@@ -14,7 +14,7 @@
         </div>
         <div class="col-xxl-4 col-xl-4 col-lg-12 col-md-12 col-sm-12 py-3">
           <!-- Description Top -->
-          <section id = "product_details" class="p-3 bg-white" style="position: relative; min-height: 300px;">
+          <section id = "product_details" class="p-3 bg-white" style="position: relative; min-height: 400px;">
             <p class="pt-2 text-secondary">Buyout Price: $ {{auction.buyout_price}}</p>
             <p class="text-secondary">
               {% if bids %}
@@ -26,6 +26,15 @@
               {% else %}
                 Current Bid: $ 0.00
               {% endif %}
+            </p>
+            <p class="text-secondary">
+              
+              {% if not bids %}
+                {% if auction.starting_bid %}
+                  Starting Bid: $ {{auction.starting_bid}}
+                {% endif %}
+              {% endif %}
+                
             </p>
             <p class="text-secondary">Category: {{auction.category}}</p>
 
@@ -41,20 +50,38 @@
                   </form>  
                   <!-- if user != op -->
                 {% else %}
+                <!-- if already in watchlist -->
+                
+                {% if watching %}
                 <form action="{% url 'auction' auction.id %}" method="post">
                       {% csrf_token %}
                       <div class="row">
                         <div class="col">
                           <div class="form-group px-3">
-                            <input type="submit" name="add_watchlist" value="Add to WatchList" class="btn btn-success px-5">
+                            <input type="submit" name="remove_watchlist" value="Remove from WatchList" class="btn btn-danger px-5">
                           </div>
                         </div>
                       </div>
-                    </form> 
+                </form> 
+                {% else %}
+                <!-- if auction not in watchlist -->
+                <form action="{% url 'auction' auction.id %}" method="post">
+                      {% csrf_token %}
+                      <div class="row">
+                        <div class="col">
+                          <div class="form-group pl-5">
+                            <input type="submit" name="add_watchlist" value="Add to WatchList" class="btn btn-success px-4">
+                          </div>
+                        </div>
+                      </div>
+                </form>                   
+                {% endif %}
+                  
+
                 {% with bids|first as latest_bid  %}
                 <!-- if user has the last bid -->
                   {% if latest_bid.posted_by == request.user %}
-                    <div class="btn btn-primary" style="margin-bottom: 15px; padding-left: 3em; padding-right: 3em;"> You have the latest bid</div>
+                    <div class="btn btn-primary" style="margin-bottom: 15px; margin-left: 1em;padding-left: 3em; padding-right: 3em;"> You have the latest bid</div>
                   {% else %}
                 <!-- if user does not have the last bid -->
                     <form action="{% url 'auction' auction.id %}" method="post">
@@ -100,7 +127,7 @@
         {% for comment in thread %}
           {% if comment == thread|first %}
             {% if comment == thread|last %}
-              <p class="px-3 py-3 text-seconary">
+              <p class="px-3 py-3 text-secondary">
               
               {% if comment.user %}
                 {{comment.user}} : {{comment.comment}}
@@ -110,7 +137,7 @@
                 
               </p>              
             {% else %}
-              <p class="px-3 pt-3 text-seconary">
+              <p class="px-3 pt-3 text-secondary">
               {% if comment.user %}
                 {{comment.user}} : {{comment.comment}}
               {% else %}
@@ -120,7 +147,7 @@
             {% endif %}
           {% else %}
             {% if comment == thread|last %}
-              <p class="px-5 pb-3  text-seconary">
+              <p class="px-5 pb-3  text-secondary">
                 {% if comment.user %}
                  {{comment.user}} : {{comment.comment}}
                 {% else %}
@@ -128,7 +155,7 @@
                 {% endif %}
               </p>             
             {% else %}
-              <p class="px-5  text-seconary">
+              <p class="px-5  text-secondary">
                 {% if comment.user %}
                  {{comment.user}} : {{comment.comment}}
                 {% else %}
@@ -158,7 +185,7 @@
         
 
    {% empty %}
-    <p class="text-seconday"> No Comments found</p>
+    <p class="text-secondary"> No Comments found</p>
    {% endfor %}
         <div class="b-3 rounded pb-5">
       

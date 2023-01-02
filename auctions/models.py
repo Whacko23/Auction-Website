@@ -27,6 +27,7 @@ class Auction(models.Model):
     closed = models.BooleanField(default=False)
     winner = models.ForeignKey(User,on_delete=models.SET_NULL, null=True, blank=True, related_name='won_auctions')
     allotted_time = models.IntegerField()
+    starting_bid = models.IntegerField(null=True, blank=True)
     image = models.ImageField(upload_to="images/product/%Y/%m", null=True, blank=True)
 
     def __str__(self) -> str:

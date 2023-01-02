@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.core.files.storage import FileSystemStorage
 from datetime import date
 
-
+#TODO Close the auction based on allotted_time
 
 from .models import User, Auction, Bids, Categories, Comments, Watchlist
 
@@ -27,12 +27,12 @@ def comment_to_list(comments):
     return mainlist        
     
 def get_watchlist(req_user):
-    watchlist_object = Watchlist.objects.filter(user=req_user)
+    watchlist_queryset = Watchlist.objects.filter(user=req_user)
     
     watchlist =[]
 
-    #Converting watchlist object to auction object
-    for item in watchlist_object:
+    #Converting watchlist queryset to auction list
+    for item in watchlist_queryset:
         # Manually adjusting image url
         item.auction.image = '../' + str(item.auction.image)
         watchlist.append(item.auction)
@@ -50,25 +50,34 @@ def file_upload(request, field_name, location=''):
 
 def get_year_month():
     return str(date.today().year) + '/' + str(date.today().month) + '/'
-    
+
+def get_won_auctions(request_user):
+    return Auction.objects.filter(winner=request_user)
+
 # Webpage Views
 
 def index(request):
     auctions = Auction.objects.filter(closed=False)
     watchlist = get_watchlist(request.user) if request.user.is_authenticated else []
+    won_auctions = get_won_auctions(request.user) if request.user.is_authenticated else []
+    
     return render(request, "auctions/index.html", {
         "auctions": auctions,
         "watchlist": watchlist,
         "title": 'Active Listing',
+        "won_auctions": won_auctions,
+
 
     })
 
 def auction(request, id):
     message = ''
+    green_message = ''
     item_in_watchlist = False
     current_auction = Auction.objects.get(pk=id)
 
     watchlist = get_watchlist(request.user) if request.user.is_authenticated else []
+    won_auctions = get_won_auctions(request.user) if request.user.is_authenticated else []
 
     if current_auction in watchlist:
         item_in_watchlist = True
@@ -113,7 +122,7 @@ def auction(request, id):
 
     comment_list = comment_to_list(comments)
 
-        # Add to watchlist
+    # Add to watchlist
     if request.method=="POST" and 'add_watchlist' in request.POST:
         new_watchlist_item = Watchlist(user=request.user, auction=Auction.objects.get(pk=id))
         if not item_in_watchlist:
@@ -131,9 +140,18 @@ def auction(request, id):
                 "comments": comment_list,
                 "message": message,
                 "watchlist": watchlist,
+                "watching":item_in_watchlist,
+                "won_auctions": won_auctions,
 
             }) 
-        
+
+    # Remove form wathclist
+    if request.method=="POST" and 'remove_watchlist' in request.POST:
+        Watchlist.objects.filter(auction=current_auction).delete()
+        return HttpResponseRedirect(reverse('auction', kwargs={
+            "id":id,
+        }))
+
     if request.method=="POST" and 'bid_amount' in request.POST:
         #IF the user not logged in and wants to bid, redirect to login
         if not request.user.is_authenticated:
@@ -151,11 +169,27 @@ def auction(request, id):
                 "comments": comment_list,
                 "message": message,
                 "watchlist": watchlist,
+                "watching":item_in_watchlist,
+                "won_auctions": won_auctions,
+
 
             }) 
 
         # IF bid amount is not greater than latest bid
-        if int(bid) < int(highest_bid) + 5:
+        if int(bid) < int(current_auction.starting_bid):
+            message = f'The starting bid is $ {current_auction.starting_bid}. Please bid higher'
+            return render(request, "auctions/auction.html",{
+                "auction": current_auction,
+                "img": img,
+                "bids": bids,
+                "comments": comment_list,
+                "message": message,
+                "watchlist": watchlist,
+                "watching":item_in_watchlist,
+                "won_auctions": won_auctions,
+
+            })
+        elif int(bid) < int(highest_bid) + 5:
             message = f'The current bid is $ {highest_bid}. Please bid at least $ {highest_bid + 5}'
             return render(request, "auctions/auction.html",{
                 "auction": current_auction,
@@ -164,6 +198,8 @@ def auction(request, id):
                 "comments": comment_list,
                 "message": message,
                 "watchlist": watchlist,
+                "watching":item_in_watchlist,
+                "won_auctions": won_auctions,
 
             })            
         else:
@@ -176,6 +212,16 @@ def auction(request, id):
         }))
 
 
+    # Update the current winner after auction expires or closes
+    if current_auction.closed and not current_auction.winner:
+        latest_bid = bids.first()
+        if latest_bid.posted_by == request.user:
+            current_auction.winner = latest_bid.posted_by
+            current_auction.save()
+            green_message = "Congratulations! You won the auction"
+
+    # Note, the winner updates only after visiting the closed auction.
+    # The winner message is displayed only once
 
     return render(request, "auctions/auction.html",{
         "auction": current_auction,
@@ -183,7 +229,12 @@ def auction(request, id):
         "bids": bids,
         "comments": comment_list,
         "message": message,
+        "green_message": green_message,
         "watchlist": watchlist,
+        "watching":item_in_watchlist,
+        "won_auctions": won_auctions,
+
+
     })
 
 def login_view(request):
@@ -240,16 +291,20 @@ def register(request):
 def categories(request):
     categories = Categories.objects.all()
     watchlist = get_watchlist(request.user) if request.user.is_authenticated else []
+    won_auctions = get_won_auctions(request.user) if request.user.is_authenticated else []
 
     return render(request, "auctions/categories.html",{
         "categories": categories,
         "watchlist": watchlist,
+        "won_auctions": won_auctions,
+
     })
 
 def category_listing(request, category):
     category = Categories.objects.get(pk=category)
     auctions = category.auctions.filter(closed=False)
     watchlist = get_watchlist(request.user) if request.user.is_authenticated else []
+    won_auctions = get_won_auctions(request.user) if request.user.is_authenticated else []
 
     for auction in auctions:
         auction.image = '../' + str(auction.image)
@@ -258,6 +313,7 @@ def category_listing(request, category):
     return render(request, "auctions/index.html", {
         "auctions": auctions,
         "watchlist": watchlist,
+        "won_auctions": won_auctions,
         'title': category,
 
     })
@@ -265,23 +321,42 @@ def category_listing(request, category):
 def closed_auctions(request):
     auctions = Auction.objects.filter(closed=True)
     watchlist = get_watchlist(request.user) if request.user.is_authenticated else []
+    won_auctions = get_won_auctions(request.user) if request.user.is_authenticated else []
 
     return render(request, "auctions/index.html", {
         "auctions": auctions,
         'title': 'Closed Auctions', 
         'watchlist': watchlist,
+        "won_auctions": won_auctions,
+
     })
 
 def watchlist(request):
     watchlist = get_watchlist(request.user)   
+    won_auctions = get_won_auctions(request.user) if request.user.is_authenticated else []
 
     return render(request, "auctions/index.html", {
         "auctions": watchlist,
         "watchlist": watchlist,
         'title': 'Watchlist',
+        "won_auctions": won_auctions,
+
+    })
+
+def won_auctions(request):
+    watchlist = get_watchlist(request.user)   
+    won_auctions = get_won_auctions(request.user) if request.user.is_authenticated else []
+
+    return render(request, "auctions/index.html", {
+        "auctions": won_auctions,
+        "watchlist": watchlist,
+        'title': 'Won Auctions',
+        "won_auctions": won_auctions,
+
     })
 
 def create_listing(request):
+
     #Note: Skipped input validation
     if request.method == 'POST':
         name = request.POST["title"]
@@ -297,10 +372,13 @@ def create_listing(request):
             "id": new_auction.id,
         }))
 
+    won_auctions = get_won_auctions(request.user) if request.user.is_authenticated else []
     watchlist = get_watchlist(request.user) if request.user.is_authenticated else []
     categories = Categories.objects.all()
 
     return render(request, "auctions/createauction.html",{
         "watchlist": watchlist,
         'categories': categories,
+        "won_auctions": won_auctions,
+
     })
