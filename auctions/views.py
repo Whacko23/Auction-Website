@@ -6,7 +6,11 @@ from django.urls import reverse
 from django.core.files.storage import FileSystemStorage
 from datetime import date
 
+#NOTE: Server Side Validation Skipped/ Too Much Work for non-production site
+
 #TODO Close the auction based on allotted_time
+#TODO Test: Close auction -> Update Winner
+
 
 from .models import User, Auction, Bids, Categories, Comments, Watchlist
 
@@ -79,6 +83,15 @@ def auction(request, id):
     watchlist = get_watchlist(request.user) if request.user.is_authenticated else []
     won_auctions = get_won_auctions(request.user) if request.user.is_authenticated else []
 
+    #Ordering the bids by highest to lowest
+    bids = current_auction.bids.all().order_by('-amount')
+    latest_bid = bids.first() if bids else None
+
+    if bids:
+        highest_bid = bids.first().amount
+    else :
+        highest_bid = 0
+        
     if current_auction in watchlist:
         item_in_watchlist = True
 
@@ -107,15 +120,11 @@ def auction(request, id):
         comment.save()
     elif request.method == 'POST' and 'close-auction' in request.POST:
         current_auction.closed = True
+        if latest_bid:
+            current_auction.winner = latest_bid.created_by
         current_auction.save()
+        
 
-
-    #Ordering the bids by highest to lowest
-    bids = current_auction.bids.all().order_by('-amount')
-    if bids:
-        highest_bid = bids.first().amount
-    else :
-        highest_bid = 0
     #Manually adjusting image url
     img = '../' + str(current_auction.image)
     comments = current_auction.comments.all()
@@ -214,7 +223,6 @@ def auction(request, id):
 
     # Update the current winner after auction expires or closes
     if current_auction.closed and not current_auction.winner:
-        latest_bid = bids.first()
         if latest_bid.posted_by == request.user:
             current_auction.winner = latest_bid.posted_by
             current_auction.save()
